@@ -101,21 +101,20 @@ pub fn q4() {
 }
 
 pub fn q5() {
-    let mut last_flip = 0;
-    let mut rng = rand::thread_rng();
+    let mut last_flip: i32 = 0;
+    let mut rng = rand::rng();
 
     for x in 1..=1000 {
         //flip coin
-        let mut this_flip = rng.gen_range(0..=1);
+        let this_flip = rng.random_range(0..=1);
 
         if x != 1 {
             if (last_flip == 0 && this_flip == 0) {
                 print!("Got 2 consecute head at {}th flip", x);
-                // break
+                break;
             }
-
-            last_flip = this_flip
         }
+        last_flip = this_flip;
     }
     print!("1000");
 }
