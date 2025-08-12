@@ -3,7 +3,7 @@ sys.path.append("./src")
 
 from fastapi import FastAPI as FAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.routes.socket_routes import router as socket_router
+from routes.socket_routes import router as socket_router
 
 app = FAPI()
 
