@@ -1,0 +1,32 @@
+.navRoot {
+    display: flex;
+    justify-content: space-between;
+    height: 40px;
+    width: 100%;
+}
+
+.button {
+    flex: 1 1 0;
+    background-color: var(--bg-dark);
+    color: var(--accent-light);
+    border: 2px solid transparent;
+    font-size: 1.05rem;
+    font-family: inherit;
+    padding: 12px 0;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    border-radius: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    gap: 8px;
+}
+
+.borderRight {
+    border-right: 1px solid var(--accent-light);
+}
+
+.borderLeft {
+    border-left: 1px solid var(--accent-light);
+}

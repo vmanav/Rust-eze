@@ -1,0 +1,61 @@
+.root {
+    position: relative;
+}
+
+.header {
+    position: relative;
+    height: 24px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 1rem;
+    background-color: var(--accent-light);
+}
+
+.headerBtn {
+    position: absolute;
+    cursor: pointer;
+}
+
+.title {
+    text-align: center;
+    font-style: italic;
+}
+
+.indexTitle {
+    margin-top: 0;
+    padding: 0.5rem;
+    background-color: var(--accent-light);
+    text-align: center;
+}
+
+.container {
+    position: absolute;
+    top: 56px;
+    left: 0;
+    background-color: var(--accent-light);
+    min-height: calc(100vh - 56px);
+    width: 100%;
+    transition: transform 0.4s cubic-bezier(.6, 0, .3, 1),
+        opacity 0.8s cubic-bezier(.6, 0, .3, 1);
+    transform: translateX(-120%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.openContainer {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+}
+
+.list {
+    li {
+        margin: 0.6rem;
+        cursor: pointer;
+        font-style: italic;
+    }
+}
+
+.dummyLesson {
+    cursor: not-allowed !important;
+}

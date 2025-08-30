@@ -1,0 +1,45 @@
+.root {
+    background-color: var(--accent-light);
+    flex-grow: 1;
+    padding: 20px;
+    padding-top: 10px;
+    max-height: 100vh;
+    overflow-y: auto;
+
+    pre {
+        font-family: monospace;
+        overflow-y: auto;
+        background-color: #f6f8fa !important;
+        font-size: 0.9rem;
+        font-style: italic;
+        padding: 0.6rem;
+    }
+}
+
+.title {
+    color: var(--bg-dark);
+    margin-top: 0 !important;
+    margin-top: 15px;
+    text-align: center;
+}
+
+.accordion {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 1rem 0;
+
+    pre {
+        font-family: monospace;
+        overflow-y: auto;
+        background-color: #f6f8fa !important;
+        font-size: 0.9rem;
+        font-style: italic;
+        padding: 0.6rem;
+    }
+}
+
+.copyButton {
+    float: right;
+    margin-right: 1rem;
+}
