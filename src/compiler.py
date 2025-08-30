@@ -16,7 +16,7 @@ async def run_rust_code(code_snippet: str, websocket: WebSocket):
 
     try:
         augmented_code_snippet = augment_code(code_snippet)
-        # print("Augmented Code : ", augmented_code_snippet);
+        # print("augmented code: ", augmented_code_snippet);
 
         with open(rust_source, "w") as file:
             file.write(augmented_code_snippet)
@@ -45,9 +45,8 @@ async def run_rust_code(code_snippet: str, websocket: WebSocket):
 
         while True:
             code_line = await main_process.stdout.readline()
-            # print("Line :", code_line)
             code_line = code_line.decode()
-            # print("Decoded line :", code_line)
+            # print("Decoded line:", code_line)
 
             if not code_line:
                 if main_process_status is not None:
