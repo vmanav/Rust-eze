@@ -1,7 +1,4 @@
-ID: 124104460
-Name: Verma Manav
-
-## Interactive Platform for Introducing Rust to Python Programmers
+## Rust-eze: Interactive Platform for Introducing Rust to Python Programmers
 
 
 The application is already hosted here: [Rust Application](https://thesis-fe-c06n.onrender.com/)
@@ -9,7 +6,7 @@ Note: This is a free server instance so the API response time is a bit slow, it 
 
 
 We can follow these steps to run it locally on our system, after cloning the repo
-### Prerequisites : Backend
+### Prerequisites: Backend
 ```
 // Rust
 cd source/backend
