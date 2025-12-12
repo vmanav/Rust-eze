@@ -26,6 +26,7 @@ export function createSocket(
         } else if ([socketDataTypes.ERROR, socketDataTypes.STDERR].includes(socketData.type)) {
             handleOnError(socketData.message);
         } else if (socketData.type === socketDataTypes.EXECUTED) {
+            console.log("Execution complete");
             handleOnComplete();
             socket.close();
         }

@@ -6,10 +6,9 @@ function augmentCode(code) {
 
     for (let line of lines) {
         const stripped = line.trim();
-        // preserve commented lines beginning with // (Rust single-line comment)
+        // Ignore lines that are comments
         if (!stripped.startsWith('//') && line.includes('.read_line(') && line.includes('stdin')) {
-            // insert println! marker before the line where stdin is read
-            out.push(`println!("${INPUT_MARKER}");`);
+            output.push(`println!("${INPUT_MARKER}");`);
         }
         output.push(line);
     }

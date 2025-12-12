@@ -7,16 +7,16 @@ const crypto = require('crypto');
 const readline = require('readline');
 const { augmentCode, INPUT_MARKER } = require('./helper');
 
-const TEMP_DIR = path.join(__dirname, 'temp');
-console.log("TEMP_DIR : ", TEMP_DIR);
+const TEMP_DIR = path.join(__dirname, '../temp');
 if (!fs.existsSync(TEMP_DIR)) fs.mkdirSync(TEMP_DIR, { recursive: true });
 
-function sendJsonSafe(ws, obj) {
-    try { ws.send(JSON.stringify(obj)); } catch (e) { /* ignore */ }
+function sendJsonSafe(websocket, obj) {
+    try { websocket.send(JSON.stringify(obj)); } catch (e) { /* ignore */ }
 }
 
 async function executeRustCode(code, ws) {
-    const id = crypto.randomUUID();
+    console.log("Executing Rust code...");
+    const id = (crypto.randomUUID && crypto.randomUUID()) || crypto.randomBytes(16).toString('hex');
 
     const srcPath = path.join(TEMP_DIR, `${id}.rs`);
     const binPath = path.join(TEMP_DIR, `${id}${process.platform === 'win32' ? '.exe' : ''}`);
@@ -25,40 +25,41 @@ async function executeRustCode(code, ws) {
         const augmented = augmentCode(code);
         fs.writeFileSync(srcPath, augmented);
 
-        // Compile: use rustc
-        await new Promise((resolve, reject) => {
+        // Compile: use rustc and capture stderr
+        const compileResult = await new Promise((resolve) => {
             const compile = execFile('rustc', [srcPath, '-o', binPath], { timeout: 10000 }, (err, stdout, stderr) => {
-                if (err) {
-                    // send compile errors back
-                    sendJsonSafe(ws, { type: 'stderr', message: stderr || (err.message) });
-                    return reject(err);
-                }
-                resolve();
+                resolve({ err, stdout, stderr });
             });
         });
+
+        console.log("Compilation result:", compileResult);
+
+        if (compileResult.err) {
+            const stderr = compileResult.stderr || compileResult.err.message || 'Compilation failed';
+            sendJsonSafe(ws, { type: 'stderr', message: stderr });
+            return; // stop here
+        }
 
         // Spawn compiled binary
         const child = spawn(binPath, [], { stdio: ['pipe', 'pipe', 'pipe'] });
 
-        // Read stdout line-by-line
+        // line-by-line stdout
         const rl = readline.createInterface({ input: child.stdout });
 
-        // Flag to wait for input: when we detect marker, we wait for next message from websocket
-        let waitingForInput = false;
-        // Buffer to hold a one-time listener for input
         function setupOneTimeInputListener() {
             const handler = (msg) => {
+                let parsed;
                 try {
-                    const data = JSON.parse(msg.toString());
-                    const value = (data.value ?? '') + '\n';
-                    child.stdin.write(value);
+                    parsed = typeof msg === 'string' ? JSON.parse(msg) : JSON.parse(msg.toString());
                 } catch (e) {
-                    // ignore malformed input
+                    // not JSON — ignore
+                    return;
                 }
-                // remove this listener after using
-                ws.removeListener('message', handler);
+                const value = (parsed.value ?? '') + '\n';
+                try { child.stdin.write(value); }
+                catch (e) { /* child might be closed */ }
             };
-            ws.on('message', handler);
+            ws.once('message', handler);
         }
 
         rl.on('line', (line) => {
@@ -70,13 +71,14 @@ async function executeRustCode(code, ws) {
             }
         });
 
-        // capture stderr (compiler runtime errors)
         let stderrBuf = '';
         child.stderr.on('data', (d) => { stderrBuf += d.toString(); });
 
-        child.on('close', (codeExit) => {
+        child.on('close', (codeExit, signal) => {
             if (stderrBuf) sendJsonSafe(ws, { type: 'stderr', message: stderrBuf });
             sendJsonSafe(ws, { type: 'executed' });
+            if (fs.existsSync(srcPath)) fs.unlinkSync(srcPath);
+            if (fs.existsSync(binPath)) fs.unlinkSync(binPath);
         });
 
         child.on('error', (err) => {
@@ -85,15 +87,12 @@ async function executeRustCode(code, ws) {
 
     } catch (err) {
         if (err && err.code === 'ETIMEDOUT') {
+            console.log("Execution timed out.");
             sendJsonSafe(ws, { type: 'error', message: 'Timeout encountered.' });
-        } else if (!err.killed) {
-            // compile errors already emitted, but ensure we send something
+        } else {
+            console.error("Execution error:", err);
             sendJsonSafe(ws, { type: 'error', message: (err && err.message) || 'Execution failed.' });
         }
-    } finally {
-        // cleanup
-        try { if (fs.existsSync(srcPath)) fs.unlinkSync(srcPath); } catch (e) { }
-        try { if (fs.existsSync(binPath)) fs.unlinkSync(binPath); } catch (e) { }
     }
 }
 
